@@ -31,6 +31,11 @@ async function doCheck() {
         const wallet = ethers.Wallet.fromMnemonic(mnemonic);
         fs.appendFileSync('hits.txt', wallet.address + "," + wallet.privateKey + "\n");
         hits++;
+        if (hits % 50000 === 0) {
+            const newFilename = `hits.${Math.floor(hits / 50000)}.txt`;
+            fs.renameSync('hits.txt', newFilename);
+            fs.writeFileSync('hits.txt', ''); // Leer hits.txt nach dem Umbenennen
+        }
         process.stdout.write("+");
     } catch (e) { }
     await delay(0); // Prevent Call Stack Overflow
