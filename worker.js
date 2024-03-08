@@ -2,6 +2,7 @@ const fs = require("fs");
 const { ethers } = require("ethers");
 
 let tries = 0, hits = 0;
+let currentFileIndex = 1;
 const delay = time => new Promise(res => setTimeout(res, time));
 const words = fs.readFileSync("bip39.txt", { encoding: 'utf8', flag: 'r' }).replace(/(\r)/gm, "").toLowerCase().split("\n");
 const usedMnemonics = new Set();
@@ -29,18 +30,23 @@ async function doCheck() {
         usedMnemonics.add(mnemonic);
 
         const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-        fs.appendFileSync('hits.txt', wallet.address + "," + wallet.privateKey + "\n");
-        hits++;
-        if (hits % 50000 === 0) {
-            const newFilename = `hits.${Math.floor(hits / 50000)}.txt`;
-            fs.renameSync('hits.txt', newFilename);
-            fs.writeFileSync('hits.txt', ''); // Leer hits.txt nach dem Umbenennen
-        }
+        const filename = `hits.${currentFileIndex}.txt`;
+        fs.appendFileSync(filename, wallet.address + "," + wallet.privateKey + "\n");
         process.stdout.write("+");
-    } catch (e) { }
+        if (++hits % 10000 === 0) {
+            currentFileIndex++;
+        }
+    } catch (e) {
+        console.error("Error occurred: ", e);
+    }
     await delay(0); // Prevent Call Stack Overflow
     process.stdout.write("-");
+    if (hits >= 100000000) { // End the process after 100000 hits
+        console.log("Process completed.");
+        process.exit(0);
+    }
     doCheck();
 }
 
 doCheck();
+
