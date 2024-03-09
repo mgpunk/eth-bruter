@@ -3,7 +3,7 @@ const { ethers } = require("ethers");
 
 let tries = 0, hits = 0;
 let currentFileIndex = 0; // Start with 0 to include hits.txt
-const hitsPerFile = 1000; // Number of hits per file
+const hitsPerFile = 20000; // Number of hits per file
 const delay = time => new Promise(res => setTimeout(res, time));
 const words = fs.readFileSync("bip39.txt", { encoding: 'utf8', flag: 'r' }).replace(/(\r)/gm, "").toLowerCase().split("\n");
 const usedMnemonics = new Set();
